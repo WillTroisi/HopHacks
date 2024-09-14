@@ -9,26 +9,7 @@ from django.views import generic
 from .models import Split, PastWorkouts
 from dataclasses import dataclass
 
-@dataclass
-class Exercise:
-	name: str = None
-	sets: int = None
-	reps: tuple[int,int] = None
-
-@dataclass
-class SplitRepresentation:
-	exercises: list[Exercise] = None
-	days: dict[str,dict] = None
-
-
-def convert_object_list_to_split(object_list: QuerySet[Split]) -> list[SplitRepresentation]:
-	for obj in object_list:
-		exercises = obj.exercises.split(',')
-		exercises_performed_on_days = obj.exercises.split(',')
-		exerces_sets = obj.sets_per_exercise.split(',')
-		rep_range = obj.rep_range
-
-
+from .obj_list_convert import convert_object_list_to_split
 
 class SplitUserListView(LoginRequiredMixin, generic.ListView):
 	model = Split
@@ -43,7 +24,8 @@ class SplitUserListView(LoginRequiredMixin, generic.ListView):
 	def get_context_data(self, **kwargs):
 		data = super().get_context_data(**kwargs)
 		all_splits = self.object_list
-		workouts = []
+		data['split_info'] = convert_object_list_to_split(all_splits)
+		return data
 
 class PastWorkoutUserListView(LoginRequiredMixin, generic.ListView):
 	model = PastWorkouts

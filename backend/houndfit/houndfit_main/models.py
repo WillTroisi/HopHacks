@@ -11,7 +11,7 @@ class Split(models.Model):
 	'''Example:
 	user = 'manuel_test'
 	exercises = 'lat_pulldown,preacher_curls,barbell_bench_press,shoulder_press,leg_curl'
-	days = 'SMTWHF'
+	days = 'SMTWHFA'
 	exercises_performed_on_day = 'SW,SW,MH,MH,TF'
 	sets_per_exercise = '3,3,3,3,3'
 	rep_range = 'low'
