@@ -1,3 +1,4 @@
+from django.db.models.query import QuerySet
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login, logout
@@ -6,15 +7,52 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 from .models import Split, PastWorkouts
+from dataclasses import dataclass
+
+@dataclass
+class Exercise:
+	name: str = None
+	sets: int = None
+	reps: tuple[int,int] = None
+
+@dataclass
+class SplitRepresentation:
+	exercises: list[Exercise] = None
+	days: dict[str,dict] = None
+
+
+def convert_object_list_to_split(object_list: QuerySet[Split]) -> list[SplitRepresentation]:
+	for obj in object_list:
+		exercises = obj.exercises.split(',')
+		exercises_performed_on_days = obj.exercises.split(',')
+		exerces_sets = obj.sets_per_exercise.split(',')
+		rep_range = obj.rep_range
+
+
 
 class SplitUserListView(LoginRequiredMixin, generic.ListView):
 	model = Split
-	context_object_name = 'splits'
+	context_object_name = 'split'
 	template_name = 'houndfit_main/split_view_user.html'
 
 	def get_queryset(self):
 		return (
 			Split.objects.filter(user=self.request.user)
+		)
+
+	def get_context_data(self, **kwargs):
+		data = super().get_context_data(**kwargs)
+		all_splits = self.object_list
+		workouts = []
+
+class PastWorkoutUserListView(LoginRequiredMixin, generic.ListView):
+	model = PastWorkouts
+	context_object_name = 'past_workouts'
+	template_name = 'houndfit_main/past_workouts_user.html'
+
+	def get_queryset(self):
+		return (
+			PastWorkouts.objects.filter(user=self.request.user)
 		)
 
 def index(request):
@@ -68,7 +106,8 @@ def split_builder(request):
 def dashboard(request):
 	return render(request, "users/dashboard.html")
 
-def data(rqquest):
+@login_required
+def data(request):
 	return HttpResponse("View volume data")
 
 # Create your views here.
