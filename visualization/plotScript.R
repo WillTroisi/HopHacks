@@ -1,6 +1,7 @@
 install.packages("ggplot2")
 install.packages("dplyr")
 install.packages("devtools")
+# setwd("C:\Users\finco\Documents\GitHub\HopHacks")
 devtools::install_github("josedv82/bdgramR")
 
 library(bdgramR)
