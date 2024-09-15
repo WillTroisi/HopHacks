@@ -1,3 +1,8 @@
+install.packages("ggplot2")
+install.packages("dplyr")
+install.packages("devtools")
+devtools::install_github("josedv82/bdgramR")
+
 library(bdgramR)
 library(ggplot2)
 library(dplyr)
