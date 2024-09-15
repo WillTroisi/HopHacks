@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from django.db.models.query import QuerySet
+from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login, logout
@@ -39,7 +40,7 @@ class SplitBuilderView(LoginRequiredMixin, generic.FormView):
 		tricep_exercises = get_filtered_exercises("triceps", experience, "isolation", "cable")
 
 		middle_back_exercises = get_filtered_exercises("middle back", experience, "compound", "barbell")
-		bicep_exercises = get_filtered_exercises("bicep", experience, "isolation", "cable")
+		bicep_exercises = get_filtered_exercises("biceps", experience, "isolation", "machine")
 
 		quads_exercises = get_filtered_exercises("quadriceps", experience, "compound", "barbell")
 		hamstrings_exercises = get_filtered_exercises("hamstrings", experience, "compound", "barbell")
@@ -49,7 +50,7 @@ class SplitBuilderView(LoginRequiredMixin, generic.FormView):
 			exercises += shoulder_exercises[0]['id'] + ','
 			exercises += middle_back_exercises[0]['id'] + ','
 			exercises += quads_exercises[0]['id'] + ','
-			exercises += hamstrings_exercises[0]['id'] + ','
+			exercises += hamstrings_exercises[0]['id']
 
 			for x in range(frequency):
 				exercises_performed_on_days += days + ','
@@ -68,14 +69,14 @@ class SplitBuilderView(LoginRequiredMixin, generic.FormView):
 
 			# lower
 			exercises += quads_exercises[0]['id'] + ','
-			exercises += hamstrings_exercises[0]['id'] + ','
+			exercises += hamstrings_exercises[0]['id']
 
 			# ex
 			# exercises = 'bench_press,wide_grip_bench_press,barbell_row,lat_pulldown,preacher_curl,tricep_pushdown,squats,leg_curl
 			# days = "SMTW"
 			# exercises_performed_on_days = 'ST,ST,ST,ST,ST,ST,MW,MW'
 			
-			temp_exercises = [''] * 7
+			temp_exercises = [''] * 8
 			adding_upper = True
 			for day in days:
 				if adding_upper:
@@ -86,43 +87,45 @@ class SplitBuilderView(LoginRequiredMixin, generic.FormView):
 					temp_exercises[6] += day
 					temp_exercises[7] += day
 					adding_upper = True
-			exercises_performed_on_days = ','.format(temp_exercises)
+			exercises_performed_on_days = ','.join(temp_exercises)
 			sets_per_exercise = '3,3,3,3,2,2,3,3'
 		elif frequency == 6:
 			# ppl
-			exercises += chest_exercises[0]['id'] + ','
-			exercises += chest_exercises[1]['id'] + ','
-			exercises += shoulder_exercises[0]['id'] + ','
-			exercises += shoulder_exercises[1]['id'] + ','
-			exercises += tricep_exercises[0]['id'] + ','
+			exercises += chest_exercises[0]['id'] + ',' # 0
+			exercises += chest_exercises[1]['id'] + ',' # 1
+			exercises += shoulder_exercises[0]['id'] + ',' # 2
+			exercises += shoulder_exercises[1]['id'] + ',' # 3
+			exercises += tricep_exercises[0]['id'] + ',' # 4
 
 
-			exercises += middle_back_exercises[0]['id'] + ','
-			exercises += middle_back_exercises[1]['id'] + ','
-			exercises += bicep_exercises[0]['id'] + ','
-			exercises += bicep_exercises[1]['id'] + ','
+			exercises += middle_back_exercises[0]['id'] + ',' # 5
+			exercises += middle_back_exercises[1]['id'] + ',' # 6
+			exercises += bicep_exercises[0]['id'] + ',' # 7 
+			exercises += bicep_exercises[1]['id'] + ',' # 8
 
 			# lower
-			exercises += quads_exercises[0]['id'] + ','
-			exercises += hamstrings_exercises[0]['id'] + ','
+			exercises += quads_exercises[0]['id'] + ',' # 9 
+			exercises += hamstrings_exercises[0]['id'] # 10
 
-			temp_exercises = [''] * 7
+			temp_exercises = [''] * 11
 			ppl_counter = 0
 			for day in days:
+				print(f'day {day}')
 				if ppl_counter == 0:
 					for x in range(5):
 						temp_exercises[x] += day
 					ppl_counter+=1
-				if ppl_counter == 1:
-					for x in range(6,9):
+				elif ppl_counter == 1:
+					for x in range(5,9):
 						temp_exercises[x] += day
 					ppl_counter += 1
-				if ppl_counter == 2:
+				elif ppl_counter == 2:
 					temp_exercises[9] += day
 					temp_exercises[10] += day
 					ppl_counter == 0
-				exercises_performed_on_days = ','.format(temp_exercises)
-				sets_per_exercise = '3,3,3,3,3,3,3,3,3,3,3'
+			print(temp_exercises)
+			exercises_performed_on_days = ','.join(temp_exercises)
+			sets_per_exercise = '3,3,3,3,3,3,3,3,3,3,3'
 					
 
 
@@ -132,8 +135,24 @@ class SplitBuilderView(LoginRequiredMixin, generic.FormView):
 			rep_range = 'med'
 		elif progression == 'advanced':
 			rep_range = 'low'
-		
-		s = Split(self.request.user, exercises, days, exercises_performed_on_days, sets_per_exercise, rep_range, progression)
+	
+		print(self.request.user)
+		print(exercises)
+		print(days)
+		print(exercises_performed_on_days)
+		print(sets_per_exercise)
+		print(rep_range)
+		print(progression)
+
+
+		s = Split(
+			user=self.request.user, 
+			exercises=exercises, days=days,
+			exercises_performed_on_day=exercises_performed_on_days,
+			sets_per_exercise=sets_per_exercise, 
+			rep_range=rep_range, 
+			progression=progression
+			)
 		s.save()
 		return super().form_valid(form)
 
@@ -165,16 +184,18 @@ class PastWorkoutUserListView(LoginRequiredMixin, generic.ListView):
 		)
 
 def index(request):
-	return HttpResponse("Hello, world. Main view.")
+	return render(request, 'base.html', {})
 
 def registerpage(request):
 	if request.method == 'GET':
-		return render(request, template_name='registration/register.html')
+		form = UserCreationForm()
+		context = {'form': form}
+		return render(request, template_name='registration/register.html', context=context)
 	if request.method == 'POST':
 		form = UserCreationForm(request.POST)
 		if form.is_valid():
 			form.save()
-			return redirect('')
+			return redirect('/houndfit_main')
 		else:
 			return redirect('register')
 

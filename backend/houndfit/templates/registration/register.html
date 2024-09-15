@@ -1,41 +1,14 @@
-{% extends 'base.html' %}
-
-{% block title %}
-Register
-{% endblock %}
+{% extends "base.html" %}
 
 {% block content %}
+<h1>Register</h1>
 
-<body class="text-center">
-    <form class="form-signin" method="POST">
-        {% csrf_token %}
-        <img class="mb-4" src="https://res.cloudinary.com/jimshapedcoding/image/upload/v1597332609/android-icon-192x192_ove2a7.png" alt="">
-        
-        <h1 class="h3 mb-3 font-weight-normal">Please Create your Account</h1>
-
-        <!-- Display form errors (if any) -->
-        {% if form.errors %}
-            <div class="alert alert-danger">
-                <ul>
-                    {% for field in form %}
-                        {% for error in field.errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    {% endfor %}
-                </ul>
-            </div>
-        {% endif %}
-
-        <!-- Form Fields (automatically rendered from form object) -->
-        {{ form.as_p }}
-
-        <div class="checkbox mb-3">
-            <h6>Already have an Account?</h6>
-            <a class="btn btn-sm btn-secondary" href="{% url 'login' %}">Login</a>
-        </div>
-
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Create Account</button>
-    </form>
-</body>
+<form action="" method="post">
+	{% csrf_token %}
+	<table>
+		{{ form.as_table }}
+	</table>
+	<input type="submit" value="Submit">
+</form>
 
 {% endblock %}

@@ -1,13 +1,13 @@
 from django import forms
 
 days_to_the_gym = (
-	("SUN", "S"),
-	("MON", "M"),
-	("TUES", "T"),
-	("WED", "W"),
-	("THUR", "H"),
-	("FRI", "F"),
-	("SAT", "A"),
+	("S", "Sunday"),
+	("M", "Monday"),
+	("T", "Tuesday"),
+	("W", "Wednesday"),
+	("H", "Thursday"),
+	("F", "Friday"),
+	("A", "Saturday"),
 
 )
 
