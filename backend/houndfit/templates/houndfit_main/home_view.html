@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero is-success is-fullheight-with-navbar">
+	<div class="hero-body">
+		{% if user.is_authenticated %}
+		<p class="title">Welcome back, {{ user.get_username }}</p>
+		{% else %}
+		<p class="title">Welcome to Houndfit</p>
+		{% endif %}
+	</div>
+</section>
+{% endblock %}

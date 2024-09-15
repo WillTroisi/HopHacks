@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-
 from django.db.models.query import QuerySet
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
@@ -11,7 +9,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 
 from .models import Split, PastWorkouts
-from .obj_list_convert import convert_object_list_to_split
+from .obj_list_convert import convert_object_list_to_split, convert_object_list_to_past_workouts
 from .forms import SplitBuilderForm
 from .get_exercises import get_filtered_exercises
 
@@ -19,7 +17,7 @@ from .get_exercises import get_filtered_exercises
 class SplitBuilderView(LoginRequiredMixin, generic.FormView):
 	template_name = "houndfit_main/split_builder_view_user.html"	
 	form_class = SplitBuilderForm
-	success_url = '/'
+	success_url = '/houndfit_main/split'
 
 	def form_valid(self, form):
 		workout_days = form.cleaned_data['workout_days'] # ex: ["S", "T", "F"]
@@ -54,6 +52,7 @@ class SplitBuilderView(LoginRequiredMixin, generic.FormView):
 
 			for x in range(frequency):
 				exercises_performed_on_days += days + ','
+			exercises_performed_on_days = exercises_performed_on_days[:-1]
 			sets_per_exercise = '3,3,3,3,3'
 
 		elif frequency == 4 or frequency == 5:
@@ -182,9 +181,15 @@ class PastWorkoutUserListView(LoginRequiredMixin, generic.ListView):
 		return (
 			PastWorkouts.objects.filter(user=self.request.user)
 		)
+	def get_context_data(self, **kwargs):
+		data = super().get_context_data(**kwargs)
+		all_past_workouts = self.object_list
+		if all_past_workouts.count() != 0:
+			data['past_workouts'] = convert_object_list_to_past_workouts(all_past_workouts)
+		return data
 
 def index(request):
-	return render(request, 'base.html', {})
+	return render(request, 'houndfit_main/home_view.html', {})
 
 def registerpage(request):
 	if request.method == 'GET':
@@ -201,5 +206,5 @@ def registerpage(request):
 
 @login_required
 def data(request):
-	return HttpResponse("View volume data")
+	return render(request, 'houndfit_main/data_view_user.html', {})
 

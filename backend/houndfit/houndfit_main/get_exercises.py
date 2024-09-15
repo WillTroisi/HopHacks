@@ -22,6 +22,6 @@ def convert_exercise_id_to_readable(exercise_id):
 	all_exercises_json = _load_exercises_to_json()
 	for exercise in all_exercises_json:
 		if exercise['id'] == exercise_id:
-			return exercise
+			return exercise['name']
 	return ""
 

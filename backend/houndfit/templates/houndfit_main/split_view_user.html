@@ -1,19 +1,30 @@
 {% extends "base.html" %}
-
 {% block content %}
-<h1>Split</h1>
+<section class="section">
+	<h1 class="title">Split</h1>
 
-{% if split %}
-<ul>
-
-	{% for bookinst in bookinstance_list %}
-	<li class="{% if bookinst.is_overdue %}text-danger{% endif %}">
-		<a href="{% url 'book-detail' bookinst.book.pk %}">{{ bookinst.book.title }}</a> ({{ bookinst.due_back }})
-	</li>
-	{% endfor %}
-</ul>
-
-{% else %}
-<p>No Splits</p>
-{% endif %}
+	{% if split %}
+	<nav class="panel is-primary">
+		<p class="panel-heading">Split</p>
+		<p class="panel-tabs">
+			<a class="is-active">All Exercises</a>
+		</p>
+		{% for exercise in split_info.exercises %}
+		<a class="panel-block is-active">
+			<span class="panel-icon">
+				<i class="fas fa-book" aria-hidden="true"></i>
+			</span>
+			{{ exercise.name }}
+		</a>
+		{% endfor %}
+		<div class="panel-block">
+			<a class="button is-link is-outlined is-fullwidth" href="{% url 'split_builder' %}">
+				Reset split
+			</a>
+		</div>
+	</nav>
+	{% else %}
+	<h2 class="subtitle">No Splits, would you like to <a href="{% url 'split_builder' %}">add one?</a></h2>
+	{% endif %}
+</section>
 {% endblock %}

@@ -1,19 +1,25 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Past Workouts</h1>
+<section class="section">
+	<h1 class="title">Past Workouts</h1>
 
-{% if past_workouts %}
-<ul>
+	{% if past_workouts %}
+	<nav class="panel is-primary">
+		<p class="panel-heading">Past Workouts</p>
+		{% for workout in past_workouts %}
+		<a class="panel-block is-active">
+			<span class="panel-icon">
+				<i class="fas fa-book" aria-hidden="true"></i>
+			</span>
+			<strong>{{ workout.date }} | Total Sets: {{workout.sets}} |Weight moved: {{workout.weights}}</strong>
+		</a>
+		{% endfor %}
 
-	{% for bookinst in bookinstance_list %}
-	<li class="{% if bookinst.is_overdue %}text-danger{% endif %}">
-		<a href="{% url 'book-detail' bookinst.book.pk %}">{{ bookinst.book.title }}</a> ({{ bookinst.due_back }})
-	</li>
-	{% endfor %}
-</ul>
+	</nav>
 
-{% else %}
-<p>No Splits</p>
-{% endif %}
+	{% else %}
+	<p>No Previous Workouts, <strong>whatcha waiting for?</strong></p>
+	{% endif %}
+</section>
 {% endblock %}

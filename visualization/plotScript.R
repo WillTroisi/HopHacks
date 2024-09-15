@@ -1,6 +1,6 @@
-install.packages("ggplot2")
-install.packages("dplyr")
-install.packages("devtools")
+install.packages("ggplot2", repos='http://cran.us.r-project.org')
+install.packages("dplyr", repos='http://cran.us.r-project.org')
+install.packages("devtools", repos='http://cran.us.r-project.org')
 # setwd("C:\Users\finco\Documents\GitHub\HopHacks")
 devtools::install_github("josedv82/bdgramR")
 
