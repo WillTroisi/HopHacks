@@ -55,10 +55,10 @@ class SplitBuilderView(LoginRequiredMixin, generic.FormView):
 				exercises_performed_on_days += days + ','
 			sets_per_exercise = '3,3,3,3,3'
 
-		elif frequency == 4:
+		elif frequency == 4 or frequency == 5:
 			# upper 
 			exercises += chest_exercises[0]['id'] + ','
-			exercises += chest_exercises[1]['id'] + ','
+			exercises += shoulder_exercises[0]['id'] + ','
 
 			exercises += middle_back_exercises[0]['id'] + ','
 			exercises += middle_back_exercises[1]['id'] + ','
@@ -69,22 +69,62 @@ class SplitBuilderView(LoginRequiredMixin, generic.FormView):
 			# lower
 			exercises += quads_exercises[0]['id'] + ','
 			exercises += hamstrings_exercises[0]['id'] + ','
+
+			# ex
+			# exercises = 'bench_press,wide_grip_bench_press,barbell_row,lat_pulldown,preacher_curl,tricep_pushdown,squats,leg_curl
+			# days = "SMTW"
+			# exercises_performed_on_days = 'ST,ST,ST,ST,ST,ST,MW,MW'
 			
+			temp_exercises = [''] * 7
 			adding_upper = True
 			for day in days:
 				if adding_upper:
-					exercises_performed_on_days += day * 6 + ','
+					for x in range(6):
+						temp_exercises[x] += day
 					adding_upper = False
-
-
-
-			...
-		elif frequency == 5:
-			# upper/lower + arm days
-			...
+				else:
+					temp_exercises[6] += day
+					temp_exercises[7] += day
+					adding_upper = True
+			exercises_performed_on_days = ','.format(temp_exercises)
+			sets_per_exercise = '3,3,3,3,2,2,3,3'
 		elif frequency == 6:
 			# ppl
-			...
+			exercises += chest_exercises[0]['id'] + ','
+			exercises += chest_exercises[1]['id'] + ','
+			exercises += shoulder_exercises[0]['id'] + ','
+			exercises += shoulder_exercises[1]['id'] + ','
+			exercises += tricep_exercises[0]['id'] + ','
+
+
+			exercises += middle_back_exercises[0]['id'] + ','
+			exercises += middle_back_exercises[1]['id'] + ','
+			exercises += bicep_exercises[0]['id'] + ','
+			exercises += bicep_exercises[1]['id'] + ','
+
+			# lower
+			exercises += quads_exercises[0]['id'] + ','
+			exercises += hamstrings_exercises[0]['id'] + ','
+
+			temp_exercises = [''] * 7
+			ppl_counter = 0
+			for day in days:
+				if ppl_counter == 0:
+					for x in range(5):
+						temp_exercises[x] += day
+					ppl_counter+=1
+				if ppl_counter == 1:
+					for x in range(6,9):
+						temp_exercises[x] += day
+					ppl_counter += 1
+				if ppl_counter == 2:
+					temp_exercises[9] += day
+					temp_exercises[10] += day
+					ppl_counter == 0
+				exercises_performed_on_days = ','.format(temp_exercises)
+				sets_per_exercise = '3,3,3,3,3,3,3,3,3,3,3'
+					
+
 
 		if progression == 'beginner':
 			rep_range = 'med'
@@ -94,7 +134,7 @@ class SplitBuilderView(LoginRequiredMixin, generic.FormView):
 			rep_range = 'low'
 		
 		s = Split(self.request.user, exercises, days, exercises_performed_on_days, sets_per_exercise, rep_range, progression)
-
+		s.save()
 		return super().form_valid(form)
 
 class SplitUserListView(LoginRequiredMixin, generic.ListView):
@@ -127,23 +167,6 @@ class PastWorkoutUserListView(LoginRequiredMixin, generic.ListView):
 def index(request):
 	return HttpResponse("Hello, world. Main view.")
 
-def loginpage(request):
-	if request.method == 'GET':
-		return render(request, template_name='registration/login.html')
-	
-	if request.method == 'POST':
-		username = request.POST.get('username')
-		password = request.POST.get('password')
-		user = authenticate(username=username, password=password)
-		if user is not None:
-			login(request, user)
-			return redirect('dashboard')
-		else:
-			return redirect('login')
-
-def logoutpage(request):
-	...
-
 def registerpage(request):
 	if request.method == 'GET':
 		return render(request, template_name='registration/register.html')
@@ -151,32 +174,11 @@ def registerpage(request):
 		form = UserCreationForm(request.POST)
 		if form.is_valid():
 			form.save()
-			username = form.cleaned_data.get('username')
-			password = form.cleaned_data.get('password1')
-			user = authenticate(username=username, password=password)
-			login(request, user)
-			return redirect('home')
+			return redirect('')
 		else:
 			return redirect('register')
-
-@login_required
-def diary(request):
-	return HttpResponse("Past Workouts")
-
-@login_required
-def split(request):
-	return HttpResponse("Current Split")
-
-@login_required
-def split_builder(request):
-	return HttpResponse("Build a split")
-
-@login_required
-def dashboard(request):
-	return render(request, "users/dashboard.html")
 
 @login_required
 def data(request):
 	return HttpResponse("View volume data")
 
-# Create your views here.
