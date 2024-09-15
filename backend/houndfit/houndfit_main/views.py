@@ -12,6 +12,7 @@ from django.views import generic
 from .models import Split, PastWorkouts
 from .obj_list_convert import convert_object_list_to_split
 from .forms import SplitBuilderForm
+from .get_exercises import get_filtered_exercises
 
 
 class SplitBuilderView(LoginRequiredMixin, generic.FormView):
@@ -20,30 +21,63 @@ class SplitBuilderView(LoginRequiredMixin, generic.FormView):
 	success_url = '/'
 
 	def form_valid(self, form):
-		workout_days = form.cleaned_data['workout_days'] # ex: ["SUN", "TUES", "FRI"]
+		workout_days = form.cleaned_data['workout_days'] # ex: ["S", "T", "F"]
 		experience = form.cleaned_data['experience_level'] # ex: "beginner"
 
 		# create split here
 
 		frequency = len(workout_days)
 		exercises = ""
-		days = ""
+		days = ''.join(workout_days)
 		exercises_performed_on_days = ""
 		sets_per_exercise = ""
 		rep_range = ""
 		progression = experience
 
-		if frequency == 1:
-			# fullbody
-			...
-		elif frequency == 2:
-			# fullbody
-			...
-		elif frequency == 3:
-			# fullbody
-			...
+		chest_exercises = get_filtered_exercises("chest", experience, "compound", "barbell")
+		shoulder_exercises = get_filtered_exercises("shoulders", experience, "compound", "cable")
+		tricep_exercises = get_filtered_exercises("triceps", experience, "isolation", "cable")
+
+		middle_back_exercises = get_filtered_exercises("middle back", experience, "compound", "barbell")
+		bicep_exercises = get_filtered_exercises("bicep", experience, "isolation", "cable")
+
+		quads_exercises = get_filtered_exercises("quadriceps", experience, "compound", "barbell")
+		hamstrings_exercises = get_filtered_exercises("hamstrings", experience, "compound", "barbell")
+
+		if frequency <= 3:
+			exercises += chest_exercises[0]['id'] + ','
+			exercises += shoulder_exercises[0]['id'] + ','
+			exercises += middle_back_exercises[0]['id'] + ','
+			exercises += quads_exercises[0]['id'] + ','
+			exercises += hamstrings_exercises[0]['id'] + ','
+
+			for x in range(frequency):
+				exercises_performed_on_days += days + ','
+			sets_per_exercise = '3,3,3,3,3'
+
 		elif frequency == 4:
-			# upper/lower
+			# upper 
+			exercises += chest_exercises[0]['id'] + ','
+			exercises += chest_exercises[1]['id'] + ','
+
+			exercises += middle_back_exercises[0]['id'] + ','
+			exercises += middle_back_exercises[1]['id'] + ','
+
+			exercises += bicep_exercises[0]['id'] + ','
+			exercises += tricep_exercises[0]['id'] + ','
+
+			# lower
+			exercises += quads_exercises[0]['id'] + ','
+			exercises += hamstrings_exercises[0]['id'] + ','
+			
+			adding_upper = True
+			for day in days:
+				if adding_upper:
+					exercises_performed_on_days += day * 6 + ','
+					adding_upper = False
+
+
+
 			...
 		elif frequency == 5:
 			# upper/lower + arm days
@@ -52,10 +86,14 @@ class SplitBuilderView(LoginRequiredMixin, generic.FormView):
 			# ppl
 			...
 
-		days = ''.join(workout_days)
-
+		if progression == 'beginner':
+			rep_range = 'med'
+		elif progression == 'intermediate':
+			rep_range = 'med'
+		elif progression == 'advanced':
+			rep_range = 'low'
 		
-		s = Split(self.request.user, exercises, days, exercises_performed_on_days, sets_per_exercise)
+		s = Split(self.request.user, exercises, days, exercises_performed_on_days, sets_per_exercise, rep_range, progression)
 
 		return super().form_valid(form)
 
