@@ -20,7 +20,7 @@ class Split(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='split', null=True)
 	exercises = models.CharField(max_length=1000)
 	days = models.CharField(max_length=7)
-	exercises_performed_on_day = models.CharField(max_length=1000)
+	exercises_performed_on_day = models.CharField(max_length=1000, null=True)
 	sets_per_exercise = models.CharField(max_length=100)
 	rep_range = models.CharField(max_length=10)
 	progression = models.CharField(max_length=15)
